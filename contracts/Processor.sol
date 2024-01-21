@@ -7,7 +7,7 @@ import "./OwnableERC20Token.sol";
 
 contract Processor {
     OwnableERC20Token public processedToken;
-    IERC20 public usdtToken;
+    IERC20 public tagetToken;
     ERC20Permit public permitToken;
 
     uint public constant TRANSFER = 1;
@@ -38,7 +38,7 @@ contract Processor {
 
     constructor(address _targetTokenAddress, address _internalTokenAddress) {
         processedToken = OwnableERC20Token(_internalTokenAddress);
-        usdtToken = IERC20(_targetTokenAddress);
+        tagetToken = IERC20(_targetTokenAddress);
         permitToken = ERC20Permit(_targetTokenAddress);
     }
 
@@ -85,7 +85,7 @@ contract Processor {
             if (data.cmd_type == DEPOSIT)
             {
                 permitToken.permit(data.from, address(this), data.amount, data.deadline, v, r, s);
-                if (!usdtToken.transferFrom(data.from, address(this), data.amount))
+                if (!tagetToken.transferFrom(data.from, address(this), data.amount))
                 {
                     continue;
                 }
@@ -98,7 +98,7 @@ contract Processor {
                 if (processedToken.balanceOf(data.from) > data.amount)
                 {
                     processedToken.burn(msg.sender, data.amount);
-                    usdtToken.transfer(msg.sender, data.amount);
+                    tagetToken.transfer(msg.sender, data.amount);
                     emit TokensWithdrawn(msg.sender, data.amount);
                 }
             }
